@@ -16,7 +16,8 @@ prev_points = []
 patches = []
 total_points = []
 breaker = False
-
+global id
+id = 0
 
 class SelectFromCollection(object):
     def __init__(self, ax):
@@ -42,7 +43,9 @@ def break_loop(event):
         globSelect.disconnect()
         if os.path.exists(savePath):
             os.remove(savePath)
-
+        smh = open("smh.txt", "w")
+        smh.write(str(id))
+        smh.close()
         print("data saved in "+ savePath + " file")    
         with open(savePath, 'wb') as f:
             pickle.dump(total_points, f, protocol=pickle.HIGHEST_PROTOCOL)
@@ -50,25 +53,21 @@ def break_loop(event):
 
 
 def onkeypress(event):
-    global points, prev_points, total_points
-    if event.key == 'n': 
-        pts = np.array(points, dtype=np.int32)   
+    global points, prev_points, total_points, id
+    if event.key == 'n':
+        id += 1
+        pts = np.array(points, dtype=np.int32)
         if points != prev_points and len(set(points)) == 4:
             print("Points : "+str(pts))
             patches.append(Polygon(pts))
             total_points.append(pts)
             prev_points = points
 
-
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('video_path', help="Path of video file")
-    parser.add_argument('--out_file', help="Name of the output file", default="regions.p")
-    args = parser.parse_args()
-
+    
     global globSelect
     global savePath
-    savePath = args.out_file if args.out_file.endswith(".p") else args.out_file+".p"
+    savePath = "regions.p"
 
     print("\n> Select a region in the figure by enclosing them within a quadrilateral.")
     print("> Press the 'f' key to go full screen.")
@@ -78,7 +77,7 @@ if __name__ == '__main__':
     print("> After marking a quadrilateral press 'n' to save current quadrilateral and then press 'q' to start marking a new quadrilateral")
     print("> When you are done press 'b' to Exit the program\n")
     
-    video_capture = cv2.VideoCapture(args.video_path)
+    video_capture = cv2.VideoCapture("parking_vid.mp4")
     cnt=0
     rgb_image = None
     while video_capture.isOpened():
